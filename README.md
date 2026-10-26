@@ -50,6 +50,8 @@ All steps are in `student_performance_analysis.R`, organised by the six project 
 
 The data are observational, cross-sectional and partly self-reported, so all results are associations, not causal effects. Important factors such as prior ability, teaching and household income are not measured, and previous failures is best seen as a marker of earlier difficulties. Results for absences, study time, sex and higher-education plans depend on how the 38 non-completers are treated. The sample covers two schools in one country, one year and one subject, so findings may not generalise.
 
+The association with previous failures is both statistically convincing (95% CI -2.4 to -1.2 points) and practically important, as it can move a student from pass to fail; the links with going out and maternal education are statistically detectable but small (about half a grade point per step). Unmeasured confounders such as prior ability, teaching quality and household income may explain part of all these associations, and the models leave more than 80% of the variation in grades unexplained.
+
 ## 7. Decision-maker presentation
 
 A six-slide presentation for school decision-makers summarises the findings, their practical meaning, the main uncertainties and what should not be concluded: [PDF](presentation/decision_maker_presentation.pdf) | [PowerPoint](presentation/decision_maker_presentation.pptx).
