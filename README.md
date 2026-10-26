@@ -67,7 +67,6 @@ The most valuable step was checking the data before modelling: the unusual group
 | [`student_performance_analysis.R`](student_performance_analysis.R) | Complete, commented analysis script |
 | [`student-mat.csv`](student-mat.csv) | Dataset (UCI, semicolon separated, CC BY 4.0) |
 | [`report/report.pdf`](report/report.pdf) | Analytical report (6 pages + appendices) |
-| [`report/report.tex`](report/report.tex) | LaTeX source of the report |
 | [`report/analysis_output.pdf`](report/analysis_output.pdf) | Script compiled with code and all output (File → Compile Report) |
 | [`presentation/`](presentation/) | Decision-maker presentation (PowerPoint and PDF) |
 | [`figures/`](figures/) | All figures produced by the script |
