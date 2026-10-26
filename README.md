@@ -78,4 +78,4 @@ The most valuable step was checking the data before modelling: the unusual group
 2. Open the script in RStudio and set the working directory to that folder (*Session → Set Working Directory → To Source File Location*).
 3. Run the whole script (*Source*), or in the console: `source("student_performance_analysis.R", echo = TRUE)`.
 
-The script installs `ggplot2`, `dplyr` and `broom` if they are missing, and writes all figures to `figures/` and result tables to `results/`. It was tested with R 4.3 and R 4.6. To produce a PDF with code and output, use *File → Compile Report → PDF* (requires LaTeX, e.g. `tinytex::install_tinytex()`).
+The script installs `ggplot2`, `dplyr` and `broom` if they are missing, and writes all figures to `figures/` and result tables to `results/`. The analysis was run with R 4.6.1 on Windows 11. (see `results/session_info.txt`) To produce a PDF with code and output, use *File → Compile Report → PDF* (requires LaTeX, e.g. `tinytex::install_tinytex()`).
