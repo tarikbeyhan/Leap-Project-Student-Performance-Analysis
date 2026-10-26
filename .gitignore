@@ -1,0 +1,22 @@
+# R session files
+.Rhistory
+.RData
+.Rapp.history
+.Rproj.user/
+*.Rproj
+
+# Compile Report / LaTeX intermediate files
+*.spin.R
+*.spin.Rmd
+*.knit.md
+*.aux
+*.log
+*.out
+*.toc
+student_performance_analysis.tex
+student_performance_analysis_files/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
