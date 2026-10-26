@@ -1,0 +1,7 @@
+"level","rate","n","characteristic"
+"None",0.75,312,"Previous failures"
+"1 or more",0.373493975903614,83,"Previous failures"
+"no",0.35,20,"Wants higher education"
+"yes",0.688,375,"Wants higher education"
+"no",0.688953488372093,344,"Extra school support"
+"yes",0.549019607843137,51,"Extra school support"
