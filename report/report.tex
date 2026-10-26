@@ -13,6 +13,8 @@
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.2em}
 \captionsetup{font=small,labelfont=bf}
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
 \titlespacing*{\section}{0pt}{1.0ex}{0.5ex}
@@ -30,133 +32,170 @@
 Tarık Beyhan \;|\; October 2026
 \end{center}
 
-\noindent\textbf{Research question.} Which student background and behavioural characteristics explain final Mathematics performance, what drives the risk of failing, and what are the realistic limits of these observational data?
+\noindent\textbf{Research question.} Which student characteristics are associated with final Mathematics performance, which factors are linked to the risk of failing, and what conclusions can reasonably be drawn from the data?
 
-\noindent\textbf{Summary.} Across both linear and logistic specifications, past academic failure is the single strongest predictor of poor final performance and course failure. Higher maternal education correlates with better outcomes, while frequent socialising is linked to lower marks. Still, the models capture only under a fifth of the total variance in grades. Importantly, the 38 students recorded with a grade of zero appear to be non-attendees or dropouts rather than test-takers who earned zero; handling them separately significantly shifts several estimates, particularly the effect of absences. Given the cross-sectional, observational structure, these results indicate correlations rather than direct interventions.
-
-%==============================================================================
-\section{Data preparation and screening}
-
-The analysis uses the Mathematics subset of the UCI Student Performance dataset (Cortez, 2008), comprising 395 students across two Portuguese secondary schools: Gabriel Pereira (349) and Mousinho da Silveira (46). The target outcome is the final grade, \texttt{G3}, evaluated on a 0--20 scale, alongside a binary pass indicator ($\texttt{G3} \geq 10$). Following the project brief, earlier term marks (\texttt{G1} and \texttt{G2}) were excluded from the predictor pool to focus on broader student background and behaviour.
-
-Categorical survey items with natural ordering (such as parental education levels from 0 to 4, study time, and self-reported health or social habits on 1--5 scales) were retained as numeric integers for baseline modelling, while purely nominal fields were set as factors in R. 
-
-The dataset contains no missing cells, but inspection revealed an anomaly: 38 students (9.6\%) have a final grade of exactly 0, with a complete void between 1 and 3. All 38 have zero recorded absences (compared to 22\% zero-absence rates across the rest of the cohort), and their mean first-period grade was 7.5. This pattern suggests administrative dropouts or exam absentees whose attendance tracking simply ceased, rather than students who sat the exam and scored zero. Because abandoning the course still constitutes failing in practice, I retain them in the main models but evaluate the stability of the conclusions via a sensitivity check without them.
-
-From an ethics standpoint, while individual names are omitted, the survey touches on sensitive areas including home stability, substance use, and personal relationships. Because the smaller school has only 46 records, cross-referencing demographic variables could lead to re-identification. The findings are intended to highlight broad patterns where academic assistance might help, not to profile or categorise individuals.
+\noindent\textbf{Summary.} Previous class failures is the strongest and most robust correlate of a low final grade and of failing. Going out with friends more often and lower maternal education are also associated with lower grades. All models explain only about a fifth of the variation in grades. A key finding of the data checks is that 38 students recorded with a final grade of 0 almost certainly did not sit the final assessment; they distort the apparent role of absences and inflate some coefficients. Because the data are observational, none of these associations can be read as causal effects.
 
 %==============================================================================
-\section{Exploratory data analysis}
+\section{Understanding and preparing the data}
 
-The average final grade is 10.4 with a standard deviation of 4.6 (median 11, IQR 8--14). Excluding the cluster at zero, the distribution is roughly bell-shaped around 11 (Figure~\ref{fig:dist}). Overall, 67.1\% of the cohort passed (265 students) and 32.9\% failed (130 students), with the 38 zero-grade cases accounting for nearly thirty percent of all failures. Absences show marked right-skew (mean 5.7, median 4, reaching up to 75). Most participants had zero previous course failures (312 students), whereas 50 had one, 17 had two, and 16 had three or more. The gender split is fairly even (208 female, 187 male), whereas ambition for higher education is heavily skewed towards ``yes'' (375 vs 20).
+The data are the Mathematics file of the UCI Student Performance dataset (Cortez, 2008), collected in 2005 to 2006 from two Portuguese secondary schools, Gabriel Pereira (349 students) and Mousinho da Silveira (46 students), through school reports and a student questionnaire. \textbf{One row is one student} (395 rows, 33 variables).
+
+\textbf{Outcomes.} The main outcome is the final grade \texttt{G3} (0 to 20). The second outcome is a pass/fail indicator created from it (Pass if $\texttt{G3} \geq 10$). The earlier-period grades \texttt{G1} and \texttt{G2} are kept in the data but are not used as predictors, as required by the brief.
+
+\textbf{Variable types.} \emph{Numerical:} age (15 to 22), absences (0 to 75), and failures (a count top-coded at 3, meaning ``3 or more''). \emph{Ordered categories coded as numbers:} mother's and father's education (\texttt{Medu}, \texttt{Fedu}, 0 to 4), travel time and weekly study time (1 to 4), and family relations, free time, going out, workday and weekend alcohol use and health (1 to 5). \emph{Nominal or binary categories:} school, sex, address, family size, parents' cohabitation, parents' jobs, reason for school choice, guardian, and yes/no items such as extra school support, paid classes, wish to pursue higher education, internet access and romantic relationship. Nominal variables were converted to factors in R. Ordered variables were kept as integer scores; treating, for example, the step from ``2 to 5 hours'' to ``5 to 10 hours'' of study as equal in size to the step below it is a simplification I return to in Section~5.
+
+\textbf{Data quality.} There are no missing values and no duplicated rows. The one clearly problematic feature is that \textbf{38 students (9.6\%) have $\texttt{G3}=0$}, a gap below which no student scores between 1 and 3. All 38 have exactly zero recorded absences (against 22\% of other students), they had non-zero first-period grades (mean \texttt{G1} = 7.5) and 13 of them already had $\texttt{G2}=0$. The most plausible reading is that these students did not sit the final assessment (dropped out or stopped attending) and that absences were not recorded for them, rather than that they sat the exam and scored zero. I keep them in the main analysis, since not completing the course is a genuine fail, but test in Section~5 how far the conclusions depend on them.
+
+\textbf{Responsible use.} Although anonymised, the data contain sensitive items about minors: alcohol use, romantic relationships, family structure and parents' jobs. In schools of this size, a combination of school, age, sex and parents' jobs could identify individuals. Results of this kind can also be misused to label or profile students, or to justify treating groups (for example by sex or family background) differently. Any use should be aimed at offering support rather than sanctions, and conclusions should be phrased as group-level associations, never as predictions about named individuals.
+
+%==============================================================================
+\section{Exploring the data}
+
+The final grade has a mean of 10.4 and a median of 11 (SD 4.6, IQR 8 to 14). Without the zero group, the distribution is roughly symmetric around 11 (Figure~\ref{fig:dist}). \textbf{67.1\% of students pass} (265) and 32.9\% fail (130); 38 of the 130 fails are the zero-grade students. Absences are strongly right-skewed (median 4, mean 5.7, maximum 75), with a few extreme values. Most students have no previous failures (312 of 395; 50 have one, 17 two, 16 three or more). Sex is balanced (208 female, 187 male), while the wish to pursue higher education is nearly universal (375 yes, 20 no), so any comparison involving the ``no'' group rests on very few students.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.60\textwidth]{fig1_g3_distribution.png}
-\caption{Distribution of final mathematics grades, highlighting the cluster of 38 non-attendees at zero.}
+\includegraphics[width=0.62\textwidth]{fig1_g3_distribution.png}
+\caption{Distribution of the final grade. The 38 students with $\texttt{G3}=0$ (red) are separated from the rest of the distribution.}
 \label{fig:dist}
 \end{figure}
 
-Performance differences across groups are substantial. Average grades drop progressively from 11.3 among students with clean academic records down to 8.1, 6.2, and 5.7 for those with one, two, or three-plus past failures (Figure~\ref{fig:groups}a). Socialising displays a slight non-linear trend: students who report going out very rarely score somewhat below average, those reporting low social outings peak at an average of 11.2, and those at the top end of the scale drop to 9.0 (Figure~\ref{fig:groups}b). Male students averaged slightly higher than female students (10.9 vs 10.0), with an associated pass rate of 70.6\% compared to 63.9\%.
+Group comparisons point to clear differences. The mean final grade falls from 11.3 for students with no previous failures to 8.1, 6.2 and 5.7 for one, two and three or more failures (Figure~\ref{fig:groups}a). Students who report going out ``low'' (2 on the scale) have the highest mean grade (11.2), and those who go out ``very high'' the lowest (9.0); the pattern is not strictly linear, as the ``very low'' group also scores below average (Figure~\ref{fig:groups}b). Male students have a slightly higher mean grade than female students (10.9 vs 10.0) and a higher pass rate (70.6\% vs 63.9\%).
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.45\textwidth}\includegraphics[width=\linewidth]{fig2_g3_by_failures.png}\caption{By previous failures}\end{subfigure}\hfill
-\begin{subfigure}{0.45\textwidth}\includegraphics[width=\linewidth]{fig3_g3_by_goout.png}\caption{By going out frequency}\end{subfigure}
-\caption{Grade distributions across key student characteristics (box: IQR, diamond: mean).}
+\begin{subfigure}{0.43\textwidth}\includegraphics[width=\linewidth]{fig2_g3_by_failures.png}\caption{By previous class failures}\end{subfigure}\hfill
+\begin{subfigure}{0.43\textwidth}\includegraphics[width=\linewidth]{fig3_g3_by_goout.png}\caption{By going out with friends}\end{subfigure}
+\caption{Final grade by two student characteristics (box = middle 50\%, diamond = mean).}
 \label{fig:groups}
 \end{figure}
 
 %==============================================================================
-\section{Bivariate associations and variable choice}
+\section{Relationships between variables}
 
-Rank-order (Spearman) correlations largely mirrored Pearson coefficients across the ordinal indicators (full matrix in Appendix~A). Past failure count shows the clearest negative relationship with final score ($r = -0.36$), followed by maternal education ($r = 0.22$), age ($-0.16$), paternal education ($0.15$), and going out frequency ($-0.13$). Weekly study time correlates modestly ($r = 0.10$), while raw absences appear almost completely detached from grades overall ($r = 0.03$). Parental education levels are strongly collinear ($r = 0.62$), as are weekday and weekend drinking ($r = 0.65$); consequently, only one variable from each pair was considered for modelling to avoid redundancy.
+\textbf{Correlations.} Because most candidate predictors are ordered codes, I computed Spearman (rank) correlations alongside Pearson; the two give the same ranking (full heatmap in Appendix~A). The strongest association with \texttt{G3} is previous failures ($r = -0.36$), followed by mother's education ($r = 0.22$), age ($-0.16$), father's education ($0.15$) and going out ($-0.13$; Spearman $-0.17$). Study time is only weakly related ($r = 0.10$), and absences show essentially no linear relationship ($r = 0.03$). Two pairs of predictors overlap strongly: \texttt{Medu} and \texttt{Fedu} ($r = 0.62$) and workday and weekend alcohol use ($r = 0.65$), so only one of each pair is a sensible model candidate. Age is partly a proxy for failures ($r = 0.24$), since students who repeat a year are older.
+
+\textbf{Contingency tables.} Figure~\ref{fig:pass} reports column percentages. Students with at least one previous failure pass at half the rate of those with none (37.3\% vs 75.0\%; $\chi^2 = 40$, $p < 0.001$). Students who do not want to go on to higher education pass at 35\% against 69\% (Fisher's exact test $p = 0.003$), but this rests on only 20 students. Students receiving extra school support pass \emph{less} often (54.9\% vs 68.9\%, $p = 0.07$). This should not be read as support harming results: support is targeted at weaker students, so the association reflects selection (reverse causation). For that reason \texttt{schoolsup} is not used as a predictor.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.74\textwidth]{fig5_pass_rates.png}
-\caption{Pass rates ($\texttt{G3} \geq 10$) across selected binary indicators.}
+\includegraphics[width=0.78\textwidth]{fig5_pass_rates.png}
+\caption{Pass rate (\% with $\texttt{G3}\geq 10$) within each group, with group sizes.}
 \label{fig:pass}
 \end{figure}
 
-Group comparisons highlight similar divides. Students with prior failures pass at roughly half the rate of those without (37.3\% vs 75.0\%; $\chi^2 = 40, p < 0.001$). The pass rate among students not aiming for higher education is 35\% compared to 69\% for those who do ($p = 0.003$), though this group comprises only 20 individuals. Counterintuitively, students enrolled in remedial school support pass less often than those who are not (54.9\% vs 68.9\%, $p = 0.07$). This clearly reflects selection rather than an adverse effect of tutoring; support is allocated to students who are already struggling. For this reason, \texttt{schoolsup} was left out of the predictive regressions.
+\textbf{Why absences look unrelated.} Figure~\ref{fig:abs} shows that the 38 zero-grade students, all with zero absences, sit at the bottom left of the scatterplot. Among the remaining 357 students, the fitted line slopes downward. The near-zero overall correlation is therefore an artefact of how the zero group was recorded, not evidence that absences do not matter.
 
-The apparent lack of relationship between absences and performance is driven by the 38 zero-grade students, all recorded with zero absences at the bottom-left of the scatter (Figure~\ref{fig:abs}). Once these 38 cases are removed, the trend between absences and grades turns negative, showing that the overall flat correlation is an artefact of data logging.
-
-For the final models, I retained past failures, maternal education, going out, and sex as core background factors, and added study time, absences, and higher-education aspiration.
+\textbf{Variables chosen for modelling.} Previous failures, mother's education, going out and sex are the most strongly related characteristics. I add study time and absences because they are behaviours of direct interest to a school, and the wish for higher education because of its large pass-rate gap. The resulting set of seven predictors covers academic history, family background, behaviour and motivation without including strongly overlapping pairs.
 
 %==============================================================================
-\section{Regression analysis}
+\section{Linear and logistic regression models}
 
-The linear specification models \texttt{G3} against the seven selected variables, using female and no aspiration for higher education as reference levels (Table~\ref{tab:lin}).
+\textbf{Multiple linear regression.} The main model is
+$\texttt{G3} \sim \texttt{failures} + \texttt{Medu} + \texttt{goout} + \texttt{studytime} + \texttt{absences} + \texttt{sex} + \texttt{higher}$,
+with female and ``does not want higher education'' as the reference categories (Table~\ref{tab:lin}).
 
 \begin{table}[H]
 \centering\small
-\caption{Linear regression model for final Mathematics grade ($n = 395$).}
+\caption{Multiple linear regression for the final grade (all 395 students).}
 \label{tab:lin}
 \begin{tabular}{lrrrr}
 \toprule
 Predictor & Estimate & 95\% CI & $t$ & $p$ \\
 \midrule
-Previous failures & $-1.80$ & $[-2.41,\ -1.20]$ & $-5.85$ & $<0.001$ \\
-Mother's education & $0.49$ & $[0.09,\ 0.89]$ & $2.43$ & $0.016$ \\
-Going out & $-0.46$ & $[-0.83,\ -0.08]$ & $-2.38$ & $0.018$ \\
-Study time & $0.37$ & $[-0.15,\ 0.90]$ & $1.39$ & $0.164$ \\
-Absences & $0.04$ & $[-0.02,\ 0.09]$ & $1.40$ & $0.162$ \\
-Male & $1.41$ & $[0.52,\ 2.30]$ & $3.13$ & $0.002$ \\
-Wants higher education & $1.78$ & $[-0.24,\ 3.80]$ & $1.73$ & $0.084$ \\
+Previous failures (per failure) & $-1.80$ & $[-2.41,\ -1.20]$ & $-5.85$ & $<0.001$ \\
+Mother's education (per level) & $0.49$ & $[0.09,\ 0.89]$ & $2.43$ & $0.016$ \\
+Going out (per level) & $-0.46$ & $[-0.83,\ -0.08]$ & $-2.38$ & $0.018$ \\
+Study time (per category) & $0.37$ & $[-0.15,\ 0.90]$ & $1.39$ & $0.164$ \\
+Absences (per absence) & $0.04$ & $[-0.02,\ 0.09]$ & $1.40$ & $0.162$ \\
+Male (vs female) & $1.41$ & $[0.52,\ 2.30]$ & $3.13$ & $0.002$ \\
+Wants higher education (vs not) & $1.78$ & $[-0.24,\ 3.80]$ & $1.73$ & $0.084$ \\
 \midrule
-\multicolumn{5}{l}{$R^2 = 0.186$, Adjusted $R^2 = 0.171$, Residual SD = 4.17 points.}\\
+\multicolumn{5}{l}{$R^2 = 0.186$, adjusted $R^2 = 0.171$, residual SD = 4.17 grade points, $n = 395$.}\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Adjusting for other variables, every prior failure costs an estimated 1.8 points on the 20-point scale. A student with average profile values (secondary-educated mother, moderate social life, 2--5 hours study, 4 absences, female, aiming for university) has an expected score of 10.5 with no failures, dropping to 6.9 if she has repeated two years. Maternal education adds roughly half a point per level, while each step up the social outing scale reduces the expected mark by about half a point. Male students average 1.4 points higher when other predictors are held equal. Overall, the fit remains modest ($R^2 = 0.186$); more than four-fifths of grade variance remains uncaptured, and predictions carry an average uncertainty of over 4 marks.
+\emph{Interpretation.} Holding the other predictors constant, each additional previous failure is associated with a final grade about \textbf{1.8 points lower} on the 20-point scale. For a typical student (mother with secondary education, average going out, 2 to 5 hours of study, 4 absences, female, wants higher education), the predicted grade is 10.5 with no previous failures and 6.9 with two. Each additional level of mother's education is associated with a grade about 0.5 points higher, and each step up the going-out scale with a grade about 0.5 points lower, again holding the other predictors constant. Male students are predicted to score about 1.4 points higher than female students with the same values on the other predictors.
+
+The model explains 18.6\% of the variation in final grades ($R^2$). Adjusted $R^2$ rises from 0.153 for the starter model to 0.171, and AIC falls (2266 to 2259), so the two added predictors improve the fit modestly. Still, more than 80\% of the variation is left unexplained, and a typical prediction error of about 4 grade points is large on a 20-point scale.
+
+\textbf{Logistic regression.} The same predictors are used to model the probability of passing. Table~\ref{tab:log} reports odds ratios (OR); an OR below 1 means lower odds of passing, holding the other predictors constant.
 
 \begin{table}[H]
 \centering\small
-\caption{Logistic regression model for passing final Mathematics ($n = 395$).}
+\caption{Logistic regression for passing (odds ratios, all 395 students).}
 \label{tab:log}
 \begin{tabular}{lrrr}
 \toprule
 Predictor & Odds ratio & 95\% CI & $p$ \\
 \midrule
-Previous failures & $0.42$ & $[0.29,\ 0.59]$ & $<0.001$ \\
-Mother's education & $1.11$ & $[0.89,\ 1.38]$ & $0.368$ \\
-Going out & $0.71$ & $[0.57,\ 0.87]$ & $0.001$ \\
-Study time & $1.09$ & $[0.81,\ 1.48]$ & $0.559$ \\
-Absences & $0.98$ & $[0.96,\ 1.01]$ & $0.244$ \\
-Male & $1.74$ & $[1.06,\ 2.89]$ & $0.030$ \\
-Wants higher education & $2.13$ & $[0.71,\ 6.62]$ & $0.177$ \\
+Previous failures (per failure) & $0.42$ & $[0.29,\ 0.59]$ & $<0.001$ \\
+Mother's education (per level) & $1.11$ & $[0.89,\ 1.38]$ & $0.368$ \\
+Going out (per level) & $0.71$ & $[0.57,\ 0.87]$ & $0.001$ \\
+Study time (per category) & $1.09$ & $[0.81,\ 1.48]$ & $0.559$ \\
+Absences (per absence) & $0.98$ & $[0.96,\ 1.01]$ & $0.244$ \\
+Male (vs female) & $1.74$ & $[1.06,\ 2.89]$ & $0.030$ \\
+Wants higher education (vs not) & $2.13$ & $[0.71,\ 6.62]$ & $0.177$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The logistic model mirrors these patterns on the pass/fail margin (Table~\ref{tab:log}). Each past failure lowers the odds of passing by roughly 58\% ($\text{OR} = 0.42$), and each unit increase in going out reduces them by 29\% ($\text{OR} = 0.71$). Converted to probabilities for the baseline profile, a student with zero failures has a 72\% pass chance, which falls to 31\% with two past failures. Interestingly, maternal education shows no clear link to passing threshold itself ($p = 0.368$), despite its positive slope in the linear model. As a standalone classifier with a default 0.5 cut-off, the logistic model achieves 72.9\% overall accuracy, which is only slightly above the naive baseline of predicting a pass for everyone (67.1\%), successfully flagging only 35\% of actual course failures.
+\emph{Interpretation.} Each additional previous failure multiplies the odds of passing by about 0.42, that is, it reduces the odds by roughly 58\%, holding the other predictors constant. Each step up the going-out scale multiplies the odds by about 0.71. Because an odds ratio is not a change in probability, it helps to translate: for the typical student described above, the predicted probability of passing is \textbf{72\% with no previous failures and 31\% with two}. With no failures, it is 84\% if she goes out ``very little'' and 56\% if she goes out ``very much'' (Appendix~B). Male students have 1.74 times the odds of passing of comparable female students, though the interval is wide.
+
+\emph{What each model adds.} The linear model describes how far grades differ across the whole range, while the logistic model addresses the decision that matters most for a school, the risk of failing, and lets results be expressed as probabilities. Notably, mother's education is associated with grade level but not clearly with the chance of passing. As a classifier, however, the logistic model is weak: using a 0.5 cut-off it classifies 72.9\% of students correctly, only modestly above the 67.1\% achieved by predicting ``Pass'' for everyone, and it identifies just 35\% of the students who actually failed (45 of 130).
 
 %==============================================================================
-\section{Diagnostics and sensitivity analysis}
+\section{Evaluating the analysis}
 
-Residual plots from the linear fit reveal a distinct structural problem: the 38 zero-grade records line up in a clean diagonal trace well below the main scatter (Figure~\ref{fig:resid}a). Beyond this subgroup, residuals remain reasonably balanced around zero, aside from some boundary compression at the low end. The Q-Q plot (Appendix~A) confirms this substantial left-tail distortion. Multicollinearity is negligible, with variance inflation factors between 1.03 and 1.19.
+\textbf{Residuals.} The residuals-versus-fitted plot (Figure~\ref{fig:resid}a) has one clear warning sign: the 38 zero-grade students form a straight diagonal band of large negative residuals (residual $= -$fitted value), well separated from the rest. For the other students the smoothed line stays close to zero and the spread is fairly even, apart from upward curvature at the lowest fitted values, where there are few observations. The outcome is also bounded (0 to 20) and takes only whole-number values, which a linear model does not respect. The Q-Q plot (Appendix~A) shows a heavy left tail produced by the same group.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.46\textwidth}\includegraphics[width=\linewidth]{fig8_residuals_vs_fitted.png}\caption{Residuals vs fitted values}\end{subfigure}\hfill
-\begin{subfigure}{0.46\textwidth}\includegraphics[width=\linewidth]{fig6_absences_vs_g3.png}\caption{Absences vs final grade}\label{fig:abs}\end{subfigure}
-\caption{Residual behaviour and the impact of the non-attending cohort (marked red).}
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\linewidth]{fig8_residuals_vs_fitted.png}\caption{Residuals vs fitted, main linear model}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\linewidth]{fig6_absences_vs_g3.png}\caption{Absences vs final grade}\label{fig:abs}\end{subfigure}
+\caption{Model diagnostics and the role of the zero-grade group (red).}
 \label{fig:resid}
 \end{figure}
 
-Excluding these 38 cases in a sensitivity run substantively alters several parameters (Appendix~C). Most strikingly, the coefficient for absences flips from slightly positive to clearly negative ($-0.07$ points per day missed, $p < 0.001$). The penalty associated with past failures is cut roughly in half (from $-1.80$ to $-0.98$), reflecting that non-completers carried a disproportionate record of prior failures (0.92 vs 0.27 on average). Study time turns marginally significant ($p = 0.04$), while the higher-education coefficient collapses and the male advantage weakens. Meanwhile, the estimated effects for maternal education and going out remain virtually identical, demonstrating that their associations do not depend on how dropouts are handled.
+\textbf{Uncertainty.} In the linear model, previous failures is the most convincing result: the 95\% CI of $-2.41$ to $-1.20$ is far from zero ($t = -5.85$). Mother's education and going out are also statistically significant at the 5\% level, but their intervals come close to zero (0.09 to 0.89 and $-0.83$ to $-0.08$), so the true associations could be very small. The higher-education coefficient is large (1.8 points) but uncertain (CI $-0.24$ to 3.80, $p = 0.08$) because only 20 students answered ``no''. In the logistic model, the OR for failures (0.29 to 0.59) and for going out (0.57 to 0.87) both exclude 1; the OR for sex (1.06 to 2.89) only just does, and the OR for higher education (0.71 to 6.62) is too imprecise to support any conclusion.
+
+\textbf{Statistical significance and practical importance.} The two do not always coincide. A 1.8-point difference per failure is practically large: it can move a student from a pass to a fail. A 0.5-point difference per level of going out or of maternal education is statistically detectable but small relative to a residual SD of 4.2 points. Conversely, the higher-education gap may be practically important even though it is not statistically convincing here.
+
+\textbf{Overlap between predictors.} Variance inflation factors range from 1.03 to 1.19, and no pair of model predictors correlates above 0.24 in absolute value, so multicollinearity is not a concern for this specification. Overlap was avoided by design by excluding \texttt{Fedu} and the alcohol variables.
+
+\textbf{Sensitivity analysis.} Re-fitting both models without the 38 zero-grade students changes several conclusions (Appendix~C):
+\begin{itemize}
+\item The association with \textbf{absences reverses sign}: each extra absence is now associated with a grade 0.07 points lower (CI $-0.10$ to $-0.03$, $p < 0.001$) and an OR for passing of 0.95.
+\item The failures coefficient roughly \textbf{halves} ($-0.98$, CI $-1.47$ to $-0.48$) but remains clearly significant. Part of its original size reflects the fact that zero-grade students had more previous failures (mean 0.92 vs 0.27).
+\item Study time becomes significant (0.42, $p = 0.04$), while the higher-education coefficient shrinks to almost zero and the sex difference in passing is no longer significant.
+\item Mother's education and going out are almost unchanged, so these associations are robust.
+\end{itemize}
+The conclusions about failures, going out and maternal education therefore hold in both versions; those about absences, study time, sex and higher education depend on how the non-completers are treated and should be stated cautiously.
+
+\textbf{Other limitations.} Ordered predictors are entered as linear scores, but the going-out pattern is visibly non-linear, so a single slope is a simplification. The predictor set was chosen after looking at the same data, so $p$-values are somewhat optimistic. No out-of-sample validation was performed.
 
 %==============================================================================
-\section{Discussion and limitations}
+\section{Causality, limitations and conclusions}
 
-Because these data reflect an observational snapshot of two public secondary schools in 2005--2006, the associations cannot be interpreted causally. One cannot conclude that simply limiting a student's social life would directly produce higher test scores. 
+\textbf{Observational data.} The data come from school records and a questionnaire completed at one point in time; nothing was assigned or manipulated. The regression coefficients therefore describe associations, not effects. We cannot conclude, for example, that reducing going out would raise grades.
 
-Unobserved factors are likely doing much of the explanatory work. Prior foundational math competence, individual drive, household income, teacher effectiveness, and peer dynamics were not tracked. Past failures are most likely an indicator of cumulative academic struggle rather than an independent causal mechanism. Similarly, self-reported measures on brief integer scales carry unavoidable noise and reporting bias. 
+\textbf{Confounding and reverse causation.} Important influences are not measured: prior mathematical ability, motivation, teacher and class, household income and peer effects. Previous failures is best understood as a marker of earlier difficulties rather than a cause, and it is plausibly driven by the same unmeasured ability that drives \texttt{G3}. Some relationships may run in the opposite direction: students who struggle may disengage socially in different ways, and extra support is given \emph{because} students struggle.
 
-In summary, past academic difficulty remains the most reliable warning sign for poor final performance in this dataset, with family background and social balance playing secondary, consistent roles. However, the data leave over 80\% of student achievement unexplained, and several baseline conclusions—notably the role of absences—are heavily skewed by how non-attending students are handled. The model provides a broad overview of risk factors across groups, but it lacks the precision needed to guide individual interventions.
+\textbf{Self-reported and coarse measures.} Study time, going out, alcohol use and family relations are self-reported by teenagers on short scales and may be affected by recall and social-desirability bias. Absences come from school records but appear not to have been recorded for students who stopped attending. These measurement issues weaken and may bias the observed associations.
+
+\textbf{Generalisation.} The sample covers two public schools in one region of Portugal, with 88\% of students from one school, in a single year (2005 to 2006), and only the Mathematics course. The findings need not apply to other schools, countries, subjects or the present day, where grading scales, repetition policies and support systems differ.
+
+\textbf{Conclusions supported by the evidence.}
+\begin{itemize}
+\item Students with previous class failures have markedly lower final grades and a much higher risk of failing; this is the strongest and most robust pattern in the data.
+\item More frequent going out with friends and lower maternal education are associated with modestly lower grades, consistently across specifications.
+\item About one in ten students did not complete the final assessment; how these students are handled materially changes several results.
+\item The measured characteristics explain only about 19\% of the variation in grades; most of what determines performance is not captured here.
+\end{itemize}
+
+\textbf{Claims that would go beyond the evidence.} That failing a class, going out, or a mother's education \emph{causes} lower grades; that boys are inherently better at mathematics; that extra school support is ineffective; that absences do not matter; or that the model can reliably identify individual students who will fail.
 
 \vspace{1ex}
 \noindent\textbf{References}\\[0.3ex]
@@ -172,26 +211,26 @@ R Core Team (2023). \emph{R: A language and environment for statistical computin
 \section*{Appendix A. Correlation heatmap and Q-Q plot}
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.54\textwidth}\includegraphics[width=\linewidth]{fig4_correlation_heatmap.png}\end{subfigure}\hfill
-\begin{subfigure}{0.42\textwidth}\includegraphics[width=\linewidth]{figA_qq_plot.png}\end{subfigure}
-\caption{Left: Correlation matrix. Right: Normal Q-Q plot of standardised residuals from the full linear fit.}
+\begin{subfigure}{0.56\textwidth}\includegraphics[width=\linewidth]{fig4_correlation_heatmap.png}\end{subfigure}\hfill
+\begin{subfigure}{0.40\textwidth}\includegraphics[width=\linewidth]{figA_qq_plot.png}\end{subfigure}
+\caption{Left: Pearson correlations among numerical and ordered variables. Right: normal Q-Q plot of standardised residuals from the main linear model.}
 \end{figure}
 
-\section*{Appendix B. Logistic model predictions}
+\section*{Appendix B. Predicted probability of passing}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.58\textwidth]{fig7_predicted_pass_probability.png}
-\caption{Predicted pass probabilities across past failures and social outings for a female student aspiring to higher education.}
+\includegraphics[width=0.6\textwidth]{fig7_predicted_pass_probability.png}
+\caption{Predicted probability of passing from the logistic model, for a female student who wants higher education, with mother's education = 3, study time = 2 and 4 absences.}
 \end{figure}
 
-\section*{Appendix C. Sensitivity analysis: complete cases vs excluding G3 = 0}
+\section*{Appendix C. Sensitivity analysis: excluding the 38 students with G3 = 0}
 \begin{table}[H]
 \centering\small
 \begin{tabular}{lrrrr}
 \toprule
- & \multicolumn{2}{c}{Linear: coefficient [95\% CI]} & \multicolumn{2}{c}{Logistic: odds ratio [95\% CI]} \\
+ & \multicolumn{2}{c}{Linear: coefficient (95\% CI)} & \multicolumn{2}{c}{Logistic: odds ratio (95\% CI)} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Predictor & All ($n=395$) & $G3 > 0$ ($n=357$) & All ($n=395$) & $G3 > 0$ ($n=357$) \\
+Predictor & All ($n=395$) & G3 $>$ 0 ($n=357$) & All ($n=395$) & G3 $>$ 0 ($n=357$) \\
 \midrule
 Failures & $-1.80$ $[-2.41, -1.20]$ & $-0.98$ $[-1.47, -0.48]$ & 0.42 [0.29, 0.59] & 0.51 [0.35, 0.74] \\
 Mother's educ. & $0.49$ $[0.09, 0.89]$ & $0.46$ $[0.17, 0.76]$ & 1.11 [0.89, 1.38] & 1.10 [0.85, 1.42] \\
