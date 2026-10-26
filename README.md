@@ -58,7 +58,14 @@ A six-slide presentation for school decision-makers summarises the findings, the
 
 ## 8. Reflection
 
-The most valuable step was checking the data before modelling: the unusual group of zero grades with zero absences turned out to change several conclusions, which I would have missed by running the starter models directly. The hardest part was interpretation rather than code: keeping associations separate from causes, and translating odds ratios into probabilities that a non-specialist can use. With more time I would treat the ordered variables as categories rather than linear scores, model the non-completers separately (for example, completion first, then grade among completers), validate the models on held-out data, and compare results with the Portuguese-language course file.
+**What worked well.** The most valuable step was checking the data before modelling. The 38 students with a final grade of 0 all had zero recorded absences, which suggested they had not sat the final assessment. Running the starter models directly would have missed this, yet it changed several conclusions: once these students were set aside, the association with absences reversed and the one with previous failures halved. The sensitivity analysis also showed which findings were robust, as the results for maternal education and going out barely moved. Compiling the script into a single PDF with code, output and figures, and organising everything in a GitHub repository, made the work reproducible and easy to follow.
+
+**What was difficult.** Much of the difficulty was technical rather than statistical. Compiling to PDF failed until I learned that R needs LaTeX and installed it with tinytex. Running the script with `source()` failed because the working directory was not the project folder, and the starter script's fallback download from UCI did not work either, because the archive contains a nested ZIP file.
+
+**What I would improve with more time.** I would treat the ordered survey variables as categories rather than linear scores, model the non-completers separately (first whether a student completes the course, then the grade among completers), validate the models on held-out data, and compare the results with the Portuguese-language course file. I would also set up the working environment (R, LaTeX and the project folder) at the very start.
+
+**Use of AI tools.** I used an AI assistant (Claude) throughout this project: to help adapt the starter R script, to edit the draft version of the report, to draft initial version of the presentation, to edit this README, and to check my portfolio against the project brief. I ran the full analysis myself in RStudio, checked the results against my own R output, resolved the setup problems, and wrote the report in my own words. Reviewing the AI-assisted drafts critically was itself part of the learning, for example correcting causal phrasing and making sure every reported number matched my output.
+
 
 ## Files
 
@@ -78,4 +85,4 @@ The most valuable step was checking the data before modelling: the unusual group
 2. Open the script in RStudio and set the working directory to that folder (*Session → Set Working Directory → To Source File Location*).
 3. Run the whole script (*Source*), or in the console: `source("student_performance_analysis.R", echo = TRUE)`.
 
-The script installs `ggplot2`, `dplyr` and `broom` if they are missing, and writes all figures to `figures/` and result tables to `results/`. The analysis was run with R 4.6.1 on Windows 11. (see `results/session_info.txt`) To produce a PDF with code and output, use *File → Compile Report → PDF* (requires LaTeX, e.g. `tinytex::install_tinytex()`).
+The script installs `ggplot2`, `dplyr` and `broom` if they are missing, and writes all figures to `figures/` and result tables to `results/`. The analysis was run with R 4.6.1 on Windows 11 (see `results/session_info.txt`). To produce a PDF with code and output, use *File → Compile Report → PDF* (requires LaTeX, e.g. `tinytex::install_tinytex()`).
